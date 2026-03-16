@@ -1,10 +1,10 @@
 {
-  "name": "open-meteo-mcp-server",
-  "version": "1.3.1",
-  "description": "Model Context Protocol server for Open-Meteo weather APIs",
+  "name": "@kleprevost/weather-mcp",
+  "version": "1.4.0",
+  "description": "Model Context Protocol server for weather data — Open-Meteo forecasts and NWS alerts",
   "main": "dist/index.js",
   "bin": {
-    "open-meteo-mcp-server": "dist/index.js"
+    "weather-mcp": "dist/index.js"
   },
   "type": "module",
   "scripts": {
@@ -30,18 +30,21 @@
     "weather",
     "open-meteo",
     "forecast",
+    "nws",
+    "weather.gov",
+    "alerts",
     "api"
   ],
-  "author": "Claude Code",
+  "author": "kleprevost",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cmer81/open-meteo-mcp.git"
+    "url": "https://github.com/kleprevost/weather-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/cmer81/open-meteo-mcp/issues"
+    "url": "https://github.com/kleprevost/weather-mcp/issues"
   },
-  "homepage": "https://github.com/cmer81/open-meteo-mcp#readme",
+  "homepage": "https://github.com/kleprevost/weather-mcp#readme",
   "files": [
     "dist/**/*",
     "README.md",

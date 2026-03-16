@@ -12,18 +12,11 @@ import express from 'express';
 import { OpenMeteoClient } from './client.js';
 import { ALL_TOOLS } from './tools.js';
 import {
-  AirQualityParamsSchema,
-  ArchiveParamsSchema,
-  ClimateParamsSchema,
-  EcmwfParamsSchema,
-  ElevationParamsSchema,
-  EnsembleParamsSchema,
-  FloodParamsSchema,
-  ForecastParamsSchema,
   GeocodingParamsSchema,
-  MarineParamsSchema,
-  SeasonalParamsSchema,
+  NWSPointParamsSchema,
+  WeatherForecastParamsSchema,
 } from './types.js';
+import { WeatherGovClient } from './weathergov-client.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -53,6 +46,7 @@ function getClientIp(req: express.Request): string {
 
 class OpenMeteoMCPServer {
   private client: OpenMeteoClient;
+  private weatherGovClient: WeatherGovClient;
   private sessionServers: Map<
     string,
     { server: Server; transport: StreamableHTTPServerTransport; lastActivity: number }
@@ -65,6 +59,9 @@ class OpenMeteoMCPServer {
   constructor() {
     const baseURL = process.env.OPEN_METEO_API_URL || 'https://api.open-meteo.com';
     this.client = new OpenMeteoClient(baseURL);
+    this.weatherGovClient = new WeatherGovClient(
+      process.env.WEATHERGOV_API_URL || 'https://api.weather.gov',
+    );
   }
 
   private createServer(): Server {
@@ -95,33 +92,8 @@ class OpenMeteoMCPServer {
         let result: unknown;
         switch (name) {
           case 'weather_forecast': {
-            const params = ForecastParamsSchema.parse(args);
-            result = await this.client.getForecast(params);
-            break;
-          }
-          case 'weather_archive': {
-            const params = ArchiveParamsSchema.parse(args);
-            result = await this.client.getArchive(params);
-            break;
-          }
-          case 'air_quality': {
-            const params = AirQualityParamsSchema.parse(args);
-            result = await this.client.getAirQuality(params);
-            break;
-          }
-          case 'marine_weather': {
-            const params = MarineParamsSchema.parse(args);
-            result = await this.client.getMarine(params);
-            break;
-          }
-          case 'elevation': {
-            const params = ElevationParamsSchema.parse(args);
-            result = await this.client.getElevation(params);
-            break;
-          }
-          case 'flood_forecast': {
-            const params = FloodParamsSchema.parse(args);
-            result = await this.client.getFlood(params);
+            const params = WeatherForecastParamsSchema.parse(args);
+            result = await this.client.getWeatherSummary(params);
             break;
           }
           case 'geocoding': {
@@ -129,54 +101,14 @@ class OpenMeteoMCPServer {
             result = await this.client.getGeocoding(params);
             break;
           }
-          case 'dwd_icon_forecast': {
-            const params = ForecastParamsSchema.parse(args);
-            result = await this.client.getDwdIcon(params);
+          case 'get_nws_alerts': {
+            const params = NWSPointParamsSchema.parse(args);
+            result = await this.weatherGovClient.getAlerts(params);
             break;
           }
-          case 'gfs_forecast': {
-            const params = ForecastParamsSchema.parse(args);
-            result = await this.client.getGfs(params);
-            break;
-          }
-          case 'meteofrance_forecast': {
-            const params = ForecastParamsSchema.parse(args);
-            result = await this.client.getMeteoFrance(params);
-            break;
-          }
-          case 'ecmwf_forecast': {
-            const params = EcmwfParamsSchema.parse(args);
-            result = await this.client.getEcmwf(params);
-            break;
-          }
-          case 'jma_forecast': {
-            const params = ForecastParamsSchema.parse(args);
-            result = await this.client.getJma(params);
-            break;
-          }
-          case 'metno_forecast': {
-            const params = ForecastParamsSchema.parse(args);
-            result = await this.client.getMetno(params);
-            break;
-          }
-          case 'gem_forecast': {
-            const params = ForecastParamsSchema.parse(args);
-            result = await this.client.getGem(params);
-            break;
-          }
-          case 'seasonal_forecast': {
-            const params = SeasonalParamsSchema.parse(args);
-            result = await this.client.getSeasonal(params);
-            break;
-          }
-          case 'climate_projection': {
-            const params = ClimateParamsSchema.parse(args);
-            result = await this.client.getClimate(params);
-            break;
-          }
-          case 'ensemble_forecast': {
-            const params = EnsembleParamsSchema.parse(args);
-            result = await this.client.getEnsemble(params);
+          case 'get_nws_forecast': {
+            const params = NWSPointParamsSchema.parse(args);
+            result = await this.weatherGovClient.getForecast(params);
             break;
           }
           default:
